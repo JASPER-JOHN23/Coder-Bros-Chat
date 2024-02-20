@@ -39,7 +39,7 @@ def main(page: Page):
     page.on_logout = on_logout
     page.add(login_button, logout_button)
 
-flet.app(target=main, port=8550, view=flet.WEB_BROWSER)
+
 class Message():
     def __init__(self, user_name: str, text: str, message_type: str):
         self.user_name = user_name
