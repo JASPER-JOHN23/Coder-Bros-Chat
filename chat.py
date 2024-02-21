@@ -1,44 +1,6 @@
 import flet as ft
 from flet import TextField,Checkbox,ElevatedButton,Row
 from flet_core.control_event import ControlEvent
-import os
-
-import flet
-from flet import ElevatedButton, LoginEvent, Page
-from flet.auth.providers import GitHubOAuthProvider
-
-def main(page: Page):
-    provider = GitHubOAuthProvider(
-        client_id=os.getenv("GITHUB_CLIENT_ID"),
-        client_secret=os.getenv("GITHUB_CLIENT_SECRET"),
-        redirect_url="http://localhost:8550/api/oauth/redirect",
-    )
-
-    def login_button_click(e):
-        page.login(provider, scope=["public_repo"])
-
-    def on_login(e: LoginEvent):
-        if not e.error:
-            toggle_login_buttons()
-
-    def logout_button_click(e):
-        page.logout()
-
-    def on_logout(e):
-        toggle_login_buttons()
-
-    def toggle_login_buttons():
-        login_button.visible = page.auth is None
-        logout_button.visible = page.auth is not None
-        page.update()
-
-    login_button = ElevatedButton("Login with GitHub", on_click=login_button_click)
-    logout_button = ElevatedButton("Logout", on_click=logout_button_click)
-    toggle_login_buttons()
-    page.on_login = on_login
-    page.on_logout = on_logout
-    page.add(login_button, logout_button)
-
 
 class Message():
     def __init__(self, user_name: str, text: str, message_type: str):
@@ -49,7 +11,7 @@ class Message():
 class ChatMessage(ft.Row):
     def __init__(self, message: Message):
         super().__init__()
-        self.vertical_alignment="start"
+        self.vertical_alignment="start"  
         self.controls=[
                 ft.CircleAvatar(
                     content=ft.Text(self.get_initials(message.user_name)),
@@ -124,7 +86,35 @@ def main(page: ft.Page):
         page.update()
 
     page.pubsub.subscribe(on_message)
+    def pick_files_result(e: ft.FilePickerResultEvent):
+      global image_path
+      image_path = None
+      if e.files != None:
+          image_path = e.files[0].path
+          # TODO
 
+    def pick_file(e):
+      pick_files_dialog.pick_files()
+
+    pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
+    page.overlay.append(pick_files_dialog)
+
+    ft.IconButton(
+      icon=ft.icons.UPLOAD_FILE,
+      tooltip="Pick an image",
+      on_click=pick_file,
+  )
+    def clear_message(e):
+      global image_path
+      image_path = None
+      chat.controls.clear()
+      page.update()
+
+    ft.IconButton(
+      icon=ft.icons.CLEAR_ALL,
+      tooltip="Clear all messages",
+      on_click=clear_message,
+  )
 
     # A dialog asking for a user display name
     join_user_name = ft.TextField(
